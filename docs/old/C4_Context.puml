@@ -1,0 +1,20 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+Person(client, "Клиент")
+Person(supportTeam, "Команда по обслуживанию клиентов")
+
+System_Boundary(boundary, "Монолитная система") {
+    System(system, "Система умного дома")
+}
+
+System_Ext(heatingSystem, "Система отопления")
+System_Ext(tempMeter, "Датчики температуры")
+
+Rel(client, system, "Запросы/команды")
+Rel(supportTeam, system, "Запросы/команды")
+
+Rel(system, heatingSystem, "Команды")
+Rel(system, tempMeter, "Запросы")
+
+
+@enduml

@@ -1,0 +1,1 @@
+insert into device_module (uuid,type,name,model,supplier,site) values ('testmoduleuuid', 'HEATING', 'Example module', 'Heater V1', 'Xiaomi', 'https://xiaomi.com');

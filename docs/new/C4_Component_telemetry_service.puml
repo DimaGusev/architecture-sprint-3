@@ -1,0 +1,26 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+Person(client, "API Gateway")
+
+Container_Boundary(boundary, "Сервис телеметрии") {
+    Component(apiController, "Rest API Controller")
+    Component(kafkaListener, "Kafka listener")
+    Component(telemetryService, "Telemetry Service")
+    Component(metricAggregator, "Metric Aggregator")
+    Component(telemetryRepository, "Telemetry Repository")
+}
+
+ComponentDb(bd, "База данных телеметрии")
+ComponentQueue_Ext(kafka, "Kafka")
+
+Rel(client, apiController, "Запросы", "HTTP")
+Rel(kafka, kafkaListener, "Сообщения", "kafka")
+
+
+Rel(apiController, telemetryService, "")
+Rel(kafkaListener, telemetryService, "")
+Rel(telemetryService, metricAggregator, "")
+Rel(metricAggregator, telemetryRepository, "")
+
+Rel(telemetryRepository, bd, "")
+@enduml

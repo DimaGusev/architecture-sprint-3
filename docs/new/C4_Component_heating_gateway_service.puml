@@ -1,0 +1,33 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+Person(client, "API Gateway")
+
+Container_Boundary(boundary, "Сервис взаимодействия с устройствами отопления") {
+    Component(apiController, "Rest API Controller")
+    Component(commandService, "Command Service")
+    Component(deviceMessageEncoder, "Device Message Encoder")
+    Component(deviceMessageDecoder, "Device Message Decoder")
+    ComponentQueue(messageQueue, "Device message queue")
+    Component(deviceCommunicationGateway, "Device communication gateway")
+    Component(commandMessageSender, "Command Message Sender")
+}
+
+ComponentDb(db, "База данных")
+
+System_Ext(heatingSystemExt, "Система отопления")
+
+Rel(client, apiController, "Запросы", "HTTP")
+Rel(apiController, commandService, "")
+Rel(commandService, deviceMessageEncoder, "")
+Rel(commandService, deviceMessageDecoder, "")
+Rel(commandService, messageQueue, "")
+Rel(messageQueue, commandMessageSender, "")
+Rel(commandMessageSender, deviceCommunicationGateway, "HTTP/MQTT")
+Rel(commandMessageSender, deviceMessageDecoder, "")
+
+Rel(deviceCommunicationGateway, heatingSystemExt, "HTTP/MQTT")
+
+Rel(commandService, db, "")
+Rel(commandMessageSender, db, "")
+
+@enduml

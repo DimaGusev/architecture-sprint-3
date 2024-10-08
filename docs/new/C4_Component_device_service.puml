@@ -1,0 +1,56 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+Person(client, "API Gateway")
+
+Container_Boundary(boundary, "Сервис управления устройствами") {
+    Component(apiController, "Rest API Controller")
+    Component(deviceManager, "Device Manager")
+    Component(heatingDeviceProcessor, "Heating Device Processor")
+    Component(gateDeviceProcessor, "Gate Device Processor")
+    Component(lightDeviceProcessor, "Lighting Device Processor")
+    Component(cameraDeviceProcessor, "Camera Device Processor")
+
+    Component(heatingDeviceGatewayClient, "Heating Device Gateway API Client")
+    Component(gateDeviceGatewayClient, "Gate Device Gateway API Client")
+    Component(lightingDeviceGatewayClient, "Lighting Device Gateway API Client")
+    Component(cameraDeviceGatewayClient, "Camera Device Gateway API Client")
+
+    Component(repo, "Device Repository")
+}
+
+ComponentDb(bd, "База данных устройств")
+
+Component_Ext(heatingDeviceGateway, "Heating Device Gateway")
+Component_Ext(gateDeviceGateway, "Gate Device Gateway")
+Component_Ext(lightingDeviceGateway, "Lighting Device Gateway")
+Component_Ext(cameraDeviceGateway, "Camera Device Gateway")
+
+Rel(client, apiController, "Запросы", "HTTP")
+Rel(repo, bd, "Запросы", "sql")
+
+
+Rel(apiController, deviceManager, "")
+Rel(deviceManager, heatingDeviceProcessor, "")
+Rel(deviceManager, gateDeviceProcessor, "")
+Rel(deviceManager, lightDeviceProcessor, "")
+Rel(deviceManager, cameraDeviceProcessor, "")
+
+
+Rel(heatingDeviceProcessor, repo, "")
+Rel(gateDeviceProcessor, repo, "")
+Rel(lightDeviceProcessor, repo, "")
+Rel(cameraDeviceProcessor, repo, "")
+
+Rel(heatingDeviceProcessor, heatingDeviceGatewayClient, "")
+Rel(gateDeviceProcessor, gateDeviceGatewayClient, "")
+Rel(lightDeviceProcessor, lightingDeviceGatewayClient, "")
+Rel(cameraDeviceProcessor, cameraDeviceGatewayClient, "")
+
+
+Rel(heatingDeviceGatewayClient, heatingDeviceGateway, "Запросы", "http")
+Rel(gateDeviceGatewayClient, gateDeviceGateway, "Запросы", "http")
+Rel(lightingDeviceGatewayClient, lightingDeviceGateway, "Запросы", "http")
+Rel(cameraDeviceGatewayClient, cameraDeviceGateway, "Запросы", "http")
+
+
+@enduml

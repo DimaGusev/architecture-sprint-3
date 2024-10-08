@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Telemetry Service API
+  version: 0.0.1-SNAPSHOT
+x-kusk:
+  cors:
+    origins:
+      - "*"
+    methods:
+      - POST
+      - GET
+      - OPTIONS
+    headers:
+      - "*"
+  upstream:
+    service:
+      name: telemetry-service
+      namespace: default
+      port: 8080
+paths:
+  /telemetry:
+    post:
+      summary: Сохранение данных телеметрии
+      description: Сохранение данных телеметрии
+      operationId: saveTemeletry
+      requestBody:
+        description: Данные телеметрии
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TelemetryData'
+      responses:
+        '200':
+          description: Выполнено удачно
+        '400':
+          description: Неверные данные в запросе
+        '500':
+          description: Ошибка на сервере
+  /devices/{device_id}/telemetry/latest:
+    get:
+      summary: Получение последних данных телеметрии
+      parameters:
+        - in: path
+          name: device_id
+          schema:
+            type: string
+            example: "29d0975a-f790-4c7b-94cc-2a6d593a6695"
+          required: true
+          description: Идентификатор устройства
+      description: Возвращает последнее полученное значение телеметрии для устройства
+      operationId: getLatestTemeletry
+      responses:
+        '200':
+          description: Выполнено удачно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryData'
+        '204':
+          description: Нет телеметрии для устройства
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка на сервере
+  /devices/{device_id}/telemetry:
+    get:
+      summary: Получение исторических данных телеметрии
+      description: Возвращает исторические данные телеметрии для устройства за определённый период времени
+      operationId: getTemeletry
+      parameters:
+        - in: path
+          name: device_id
+          schema:
+            type: string
+            example: "29d0975a-f790-4c7b-94cc-2a6d593a6695"
+          required: true
+          description: Идентификатор устройства
+        - in: query
+          name: from
+          schema:
+            type: string
+            example: '2024-10-01T01:01:01.000'
+          required: true
+        - in: query
+          name: to
+          schema:
+            type: string
+            example: '2024-10-02T01:01:01.000'
+          required: true
+      responses:
+        '200':
+          description: Выполнено удачно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelemetryData"
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка на сервере
+components:
+  schemas:
+    TelemetryData:
+      type: object
+      properties:
+        houseUuid:
+          type: string
+          example: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        deviceUuid:
+          type: string
+          example: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        metricName:
+          type: string
+          example: "temperature"
+        metricValue:
+          type: string
+          example: "22"
+        metricTimestamp:
+          type: string
+          example: '2024-10-01T01:01:01.000'
