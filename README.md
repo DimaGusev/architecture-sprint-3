@@ -141,7 +141,7 @@ minikube delete
 Созданы для новых сервиса: device-service и telemetry-service.
 В микросервисе device-service не определены сущности "User" и "Home" потому что они предполагаются в другом микросервисе. Сущность DeviceType упрощена.
 
-Чтобы собрать и выпустить их в k8s нужно выполнить следующие шаги:
+Чтобы собрать и запустить их в k8s нужно выполнить следующие шаги:
 
 Собрать образ для device-service:
 
@@ -155,11 +155,19 @@ docker build -t device-service .
 minikube image load device-service:latest
 ```
 
-Устанавливает helm chart:
+Установить dependency для helm chart:
+```bash
+cd charts/device-service
+helm dependency build
+```
+
+Установить helm chart:
 ```bash
 cd charts/device-service
 helm install device-service .
 ```
+
+С помощью ```kubectl get pods``` проверить что pod *device-service-postgresql-0* в состоянии Ready, до этого момента под *device-service-\<id\>* будет падать с ошибкой и перезапускаться, как только postgresql станет доступной он удачно стартанёт.
 
 Собрать образ для telemetry-service:
 
@@ -174,11 +182,19 @@ docker build -t telemetry-service .
 minikube image load telemetry-service:latest
 ```
 
-Устанавливает helm chart:
+Установить dependency для helm chart:
+```bash
+cd charts/telemetry-service
+helm dependency build
+```
+
+Установить helm chart:
 ```bash
 cd charts/telemetry-service
 helm install telemetry-service .
 ```
+
+С помощью ```kubectl get pods``` проверить что pod *telemetry-service-postgresql-0* в состоянии Ready, до этого момента под *telemetry-service-\<id\>* будет падать с ошибкой и перезапускаться, как только postgresql станет доступной он удачно стартанёт.
 
 ## Задание 2.2
 
@@ -226,18 +242,27 @@ curl -v --request POST \
 }'
 ```
 
+В ответе от серевера будет uuid устройства. Его нужно использовать далее в запросах.
+
+Можно выполнить:
+```bash
+DEVICE_UUID=<uuid из ответа>
+```
+
+
 Получение информации об устройстве:
 
 ```bash
 curl -v --request GET \
-  --url http://localhost:8080/devices/0b679522-ff11-48b2-bd28-1d46bb44524e
+  --url http://localhost:8080/devices/${DEVICE_UUID}
 ```
+
 
 Изменение информации об устройстве:
 
 ```bash
 curl -v --request PUT \
-  --url http://localhost:8080/devices/282def4f-1449-44a8-88a2-f8e94a32fe5f \
+  --url http://localhost:8080/devices/${DEVICE_UUID} \
   --header 'Content-Type: application/json' \
   --data '{
   "moduleUuid": "testmoduleuuid",
@@ -252,7 +277,7 @@ curl -v --request PUT \
 
 ```bash
 curl -v --request PUT \
-  --url http://localhost:8080/devices/282def4f-1449-44a8-88a2-f8e94a32fe5f/status \
+  --url http://localhost:8080/devices/${DEVICE_UUID}/status \
   --header 'Content-Type: application/json' \
   --data '{
   "status": "OFF"
@@ -262,8 +287,8 @@ curl -v --request PUT \
 Отправление комманды на устройство:
 
 ```bash
-curl --request POST \
-  --url http://localhost:8080/devices/282def4f-1449-44a8-88a2-f8e94a32fe5f/commands \
+curl -v --request POST \
+  --url http://localhost:8080/devices/${DEVICE_UUID}/commands \
   --header 'Content-Type: application/json' \
   --data '{
   "command": "SET_TEMP",
