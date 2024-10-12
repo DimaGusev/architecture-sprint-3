@@ -4,6 +4,7 @@ ADD mvnw /home/app/mvnw
 ADD .mvn /home/app/.mvn
 ADD pom.xml /home/app/pom.xml
 ADD src /home/app/src
+RUN chmod +x ./mvnw
 RUN ./mvnw -Dmaven.test.skip=true clean package
 
 FROM openjdk:17-jdk-alpine
