@@ -1,0 +1,91 @@
+@startuml
+!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+Person(client, "Клиент")
+Person(supportTeam, "Команда по обслуживанию клиентов")
+
+System_Boundary(boundary, "Система управления умным домом") {
+    Container(apiGateway, "API Gateway")
+    Container_Boundary(userServiceBoundary,"Управление пользователями") {
+        Container(userService, "Сервис управления пользователями и домами")
+        ContainerDb(userServiceDb, "База данных пользователей")
+    }
+    Container_Boundary(deviceServiceBoundary,"Управление устройствами") {
+        Container(deviceService, "Сервис управления устройствами")
+        ContainerDb(deviceServiceDb, "База данных устройств")
+    }
+    Container_Boundary(telemetryServiceBoundary,"Телеметрия") {
+        Container(telemetryService, "Сервис сбора телеметрии")
+        ContainerDb(telemetryServiceDb, "База данных телеметрии")
+    }
+
+    Container_Boundary(heatingSystemServiceBoundary,"Управление отоплением") {
+        Container(heatingSystemService, "Сервис взаимодействия с устройствами отопления")
+        ContainerDb(heatingSystemServiceDb, "База данных для устройств отопления")
+    }
+
+    Container_Boundary(gateSystemServiceBoundary,"Управление воротами") {
+        Container(gateSystemService, "Сервис взаимодействия с устройствами управления воротами")
+        ContainerDb(gateSystemServiceDb, "База данных для устройств управления воротами")
+    }
+
+    Container_Boundary(lightSystemServiceBoundary,"Управление освещением") {
+        Container(lightSystemService, "Сервис взаимодействия с устройствами освещения")
+        ContainerDb(lightSystemServiceDb, "База данных для устройств управления освещением")
+    }
+
+    Container_Boundary(cameraSystemServiceBoundary,"Управление камерами") {
+        Container(cameraSystemService, "Сервис взаимодействия с камерами")
+        ContainerDb(cameraSystemServiceDb, "База данных для камер")
+    }
+
+    ContainerQueue(queueService, "Очередь обмена сообщений")
+}
+
+Rel(client, apiGateway, "Запросы/команды", "https")
+Rel(supportTeam, apiGateway, "Запросы/команды", "https")
+Rel(apiGateway, userService, "REST API", "http")
+Rel(apiGateway, deviceService, "REST API", "http")
+Rel(apiGateway, telemetryService, "REST API", "http")
+Rel(deviceService, heatingSystemService, "REST API", "http")
+Rel(deviceService, lightSystemService, "REST API", "http")
+Rel(deviceService, gateSystemService, "REST API", "http")
+Rel(deviceService, cameraSystemService, "REST API", "http")
+Rel(apiGateway, heatingSystemService, "REST API", "http")
+Rel(apiGateway, lightSystemService, "REST API", "http")
+Rel(apiGateway, gateSystemService, "REST API", "http")
+Rel(apiGateway, cameraSystemService, "REST API", "http")
+
+Rel(userService, userServiceDb, "Запросы", "SQL")
+Rel(deviceService, deviceServiceDb, "Запросы", "SQL")
+Rel(telemetryService, telemetryServiceDb, "Запросы", "SQL")
+Rel(heatingSystemService, heatingSystemServiceDb, "Запросы", "SQL")
+Rel(gateSystemService, gateSystemServiceDb, "Запросы", "SQL")
+Rel(cameraSystemService, cameraSystemServiceDb, "Запросы", "SQL")
+Rel(lightSystemService, lightSystemServiceDb, "Запросы", "SQL")
+
+Rel(heatingSystemService, queueService, "Телеметрия с устройств")
+Rel(gateSystemService, queueService, "Телеметрия с устройств")
+Rel(cameraSystemService, queueService, "Телеметрия с устройств")
+Rel(lightSystemService, queueService, "Телеметрия с устройств")
+
+Rel(queueService, telemetryService, "Телеметрия с устройств")
+
+
+System_Ext(heatingSystemExt, "Система отопления")
+System_Ext(tempMeter, "Датчики температуры")
+System_Ext(gateSystemExt, "Система управления воротами")
+System_Ext(lightSystemExt, "Система управления освещением")
+System_Ext(cameraSystemExt, "Камера наблюдения")
+
+Rel(heatingSystemService, heatingSystemExt, "Запросы", "REST/MQTT")
+Rel(gateSystemService, gateSystemExt, "Запросы", "REST/MQTT")
+Rel(lightSystemService, lightSystemExt, "Запросы", "REST/MQTT")
+Rel(cameraSystemService, cameraSystemExt, "Команды", "REST")
+
+Rel(heatingSystemExt, apiGateway, "Телеметрия", "REST/MQTT")
+Rel(gateSystemExt, apiGateway, "Телеметрия", "REST/MQTT")
+Rel(lightSystemExt, apiGateway, "Телеметрия", "REST/MQTT")
+Rel(cameraSystemExt, apiGateway, "Телеметрия/Видео", "REST")
+
+
+@enduml

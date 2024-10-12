@@ -1,0 +1,293 @@
+openapi: 3.0.3
+info:
+  title: API for Device Management
+  version: 0.0.1-SNAPSHOT
+x-kusk:
+  cors:
+    origins:
+      - "*"
+    methods:
+      - POST
+      - GET
+      - PUT
+      - OPTIONS
+    headers:
+      - "*"
+  upstream:
+    service:
+      name: device-service
+      namespace: default
+      port: 8080
+paths:
+  /devices/register:
+    post:
+      summary: Зарегистрировать новое устройство
+      description: Зарегистрировать новое устройство
+      operationId: registerDevice
+      requestBody:
+        description: Данных об устройстве
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+            example:
+                houseUuid: "houseuuid"
+                moduleUuid: "testmoduleuuid"
+                serialNumber: "123456"
+                name: "Device 1"
+                status: "ON"
+                url: "https://someurl"             
+        required: true
+      responses:
+        '200':
+          description: Выполнено удачно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+              example:
+                uuid: "29d0975a-f790-4c7b-94cc-2a6d593a6695"
+                module:
+                  uuid: "39d0975a-f790-4c7b-94cc-2a6d593a6695"
+                  type: "HEATING"
+                  model: "Heater V1"
+                  supplier: "Xiaomi"
+                serialNumber: "123456"
+                houseUuid: "houseuuid"
+                name: "Device 1"
+                status: "ON"
+                url: "https://someurl"
+        '400':
+          description: Неверные данные для регистрации
+        '500':
+          description: Ошибка на сервере
+  /devices/{device_id}:
+    put:
+      summary: Обновить информацию об устройстве
+      description: Обновить информацию об устройстве
+      operationId: updateDevice
+      parameters:
+        - in: path
+          name: device_id
+          schema:
+            type: string
+            example: "29d0975a-f790-4c7b-94cc-2a6d593a6695"
+          required: true
+          description: Идентификатор устройства
+      requestBody:
+        description: Новые данные об устройстве
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDeviceRequest'
+        required: true
+      responses:
+        '200':
+          description: Выполнено удачно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+              example:
+                uuid: "29d0975a-f790-4c7b-94cc-2a6d593a6695"
+                houseUuid: "houseuuid"
+                module:
+                  uuid: "39d0975a-f790-4c7b-94cc-2a6d593a6695"
+                  type: "HEATING"
+                  model: "Heater V1"
+                  supplier: "Xiaomi"
+                serialNumber: "123456"
+                name: "Device 1"
+                status: "ON"
+                url: "https://someurl"
+        '400':
+          description: Неверные данные для регистрации
+        '500':
+          description: Ошибка на сервере
+    get:
+      summary: Получить информацию об устройстве
+      parameters:
+        - in: path
+          name: device_id
+          schema:
+            type: string
+            example: "29d0975a-f790-4c7b-94cc-2a6d593a6695"
+          required: true
+          description: Идентификатор устройства
+      description: Получить информацию об устройстве
+      operationId: getDevice
+      responses:
+        '200':
+          description: Выполнено удачно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+              example:
+                uuid: "29d0975a-f790-4c7b-94cc-2a6d593a6695"
+                houseUuid: "houseuuid"
+                module:
+                  uuid: "39d0975a-f790-4c7b-94cc-2a6d593a6695"
+                  type: "HEATING"
+                  model: "Heater V1"
+                  supplier: "Xiaomi"
+                serialNumber: "123456"
+                name: "Device 1"
+                status: "ON"
+                url: "https://someurl"
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка на сервере
+  /devices/{device_id}/status:
+    put:
+      summary: Включить/Выключить устройство
+      description: Включить/Выключить устройство
+      operationId: updateDeviceStatus
+      parameters:
+        - in: path
+          name: device_id
+          schema:
+            type: string
+          required: true
+          description: Идентификатор устройства
+      requestBody:
+        description: Команда по изменению статуса устройства
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDeviceStatus'
+        required: true
+      responses:
+        '200':
+          description: Выполнено удачно
+          content:
+            plain/text:
+              schema:
+                type: string
+                description: "Идентифитор команды"
+        '400':
+          description: Неправильный формат запроса
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка на сервере
+  /devices/{device_id}/commands:
+    post:
+      summary: Отправить комманду на устройство
+      description: Отправить комманду на устройство
+      operationId: sendDeviceCommands
+      parameters:
+        - in: path
+          name: device_id
+          schema:
+            type: string
+          required: true
+          description: Идентификатор устройства
+      requestBody:
+        description: Комманда на устройство
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCommand'
+      responses:
+        '200':
+          description: Выполнено удачно
+          content:
+            plain/text:
+              schema:
+                type: string
+                description: "Идентифитор команды"
+        '404':
+          description: Устройство не найдено
+        '500':
+          description: Ошибка на сервере
+components:
+  schemas:
+    RegisterDeviceRequest:
+      type: object
+      properties:
+        moduleUuid:
+          type: string
+          example: testmoduleuuid 
+        serialNumber:
+          type: string
+          example: "123456"
+        houseUuid:
+          type: string
+          example: "houseUuid"
+        name:
+          type: string
+        status:
+          type: string
+          example: ON
+          enum:
+            - ON
+            - OFF
+        url:
+          type: string
+    Device:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        module:
+          $ref: "#/components/schemas/Module"
+        serialNumber:
+          type: string
+          example: "123456"
+        houseUuid:
+          type: string
+          example: "houseUuid"
+        name:
+          type: string
+        status:
+          type: string
+          example: ON
+          enum:
+            - ON
+            - OFF
+        url:
+          type: string
+    Module:
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+        name:
+          type: string
+          example: module1
+        model:
+          type: string
+          example: 'heater model V1'
+        supplier:
+          type: string
+          example: 'Xiaomi'
+        site:
+          type: string
+        type:
+          type: string
+          enum:
+            - HEATING
+            - GATE
+            - CAMERA
+            - LIGHT
+    UpdateDeviceStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - ON
+            - OFF
+    DeviceCommand:
+      type: object
+      properties:
+        command:
+          type: string
+          example: 'SET_TEMP'
+        arguments:
+          type: string
+          example: "22"

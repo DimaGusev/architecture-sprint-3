@@ -1,0 +1,62 @@
+@startuml
+class User {
+  +String userIdentifier
+  +String login
+  +String role
+  +String fullName
+  +String phone
+  +String email
+  +bool active
+  +String passwordHash
+  +Timestamp createdAt
+}
+
+class House {
+  +String houseIdentifier
+  +String userIdentifier
+  +String address
+  +bool active
+  +String status
+}
+
+class Device {
+  +String deviceIdentifier
+  +String moduleIdentifier
+  +String houseIdentifier
+  +String serialNumber
+  +String name
+  +String status
+  +String url
+}
+
+class DeviceType {
+  +String typeIdentifier
+  +String name
+}
+
+class Module {
+  +String moduleIdentifier
+  +String typeIdentifiers
+  +String name
+  +String model
+  +String supplier
+  +String site
+}
+
+class TelemetryData {
+  +String uuid
+  +String houseIdentifier
+  +String deviceIdentifier
+  +String metricName
+  +Timestamp metricTimestamp
+  +String metricValue
+  +Timestamp createdAt
+}
+
+User "1" -- "0..*" House
+House "1" -- "0..*" Device
+Device "0..*" -- "1" Module
+Module "0..*" -- "1" DeviceType
+Device "1" -- "0..*" TelemetryData
+
+@enduml
